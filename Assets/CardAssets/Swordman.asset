@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5659669f5fb18224285303594ebe4659, type: 3}
   m_Name: Swordman
   m_EditorClassIdentifier: 
+  cardId: swordman_003
   cardName: Swordman
   cost: 4
   health: 4

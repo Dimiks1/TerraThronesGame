@@ -6,7 +6,7 @@ public class MainMenu : MonoBehaviour
     public void StartGame()
     {
         Debug.Log("Start Game!");
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("SampleScene");
     }
 
     public void OpenDeckEditor()

@@ -1,11 +1,12 @@
-﻿using TMPro;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class DeckEditor : MonoBehaviour
 {
+    [Header("UI")]
     public Transform allCardsContent;
     public Transform deckContent;
     public GameObject cardPrefab;
@@ -13,81 +14,138 @@ public class DeckEditor : MonoBehaviour
     public Button saveButton;
     public Button backButton;
 
+    [Header("Card Size")]
     public float forcedWidth = 120f;
     public float forcedHeight = 40f;
 
-    public List<CardData> allCards;
-    private List<CardData> playerDeck = new List<CardData>();
+    [Header("Cards")]
+    public List<CardData> allCards = new List<CardData>();
 
-    void Start()
+    private readonly List<CardData> playerDeck = new List<CardData>();
+
+    private void Start()
     {
         if (allCardsContent == null || cardPrefab == null)
         {
-            Debug.LogError("Assign allCardsContent and cardPrefab in inspector!");
+            Debug.LogError("[DeckEditor] Assign allCardsContent and cardPrefab in inspector!");
             return;
         }
 
+        CreateAllCardButtons();
+
+        if (saveButton != null)
+        {
+            saveButton.onClick.RemoveAllListeners();
+            saveButton.onClick.AddListener(SaveDeck);
+        }
+        else
+        {
+            Debug.LogWarning("[DeckEditor] SaveButton не назначен в инспекторе.");
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.RemoveAllListeners();
+            backButton.onClick.AddListener(BackToMainMenu);
+        }
+        else
+        {
+            Debug.LogWarning("[DeckEditor] BackButton не назначен в инспекторе.");
+        }
+    }
+
+    private void CreateAllCardButtons()
+    {
         foreach (CardData cardData in allCards)
         {
+            if (cardData == null)
+                continue;
+
             GameObject cardObj = Instantiate(cardPrefab, allCardsContent, false);
+
             CardUI ui = cardObj.GetComponent<CardUI>();
             if (ui != null)
             {
-                ui.Setup(cardData); // <- ключевая строка: заполняем artwork из cardData
-                Debug.Log($"Created button for {cardData.cardName}, artwork: {(cardData.artwork ? cardData.artwork.name : "NULL")}");
-
+                ui.Setup(cardData);
+                Debug.Log($"[DeckEditor] Created button for {cardData.cardName}, id: {cardData.cardId}");
             }
             else
             {
-                Debug.LogWarning("CardPrefab missing CardUI component!");
+                Debug.LogWarning("[DeckEditor] CardPrefab missing CardUI component!");
             }
 
             Button btn = cardObj.GetComponent<Button>();
             if (btn != null)
             {
-                CardData copy = cardData; // безопасное замыкание
+                CardData copy = cardData;
                 btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(() => AddCardToDeck(copy));
             }
-        }
-
-        if (backButton != null)
-        {
-            backButton.onClick.AddListener(() =>
-            {
-                Debug.Log("Возврат в главное меню!");
-                SceneManager.LoadScene("MainMenu");
-            });
         }
     }
 
     public void AddCardToDeck(CardData cardData)
     {
+        if (cardData == null)
+            return;
+
         playerDeck.Add(cardData);
 
-        var go = Instantiate(deckCardPrefab, deckContent, false);
-        var ui = go.GetComponent<DeckCardUI>();
-        if (ui) ui.Setup(cardData, this);
+        if (deckCardPrefab != null && deckContent != null)
+        {
+            GameObject go = Instantiate(deckCardPrefab, deckContent, false);
 
-        // по желанию: прокрутить к началу
-        var scroll = deckContent.GetComponentInParent<ScrollRect>();
-        if (scroll) scroll.verticalNormalizedPosition = 1f;
+            DeckCardUI ui = go.GetComponent<DeckCardUI>();
+            if (ui != null)
+                ui.Setup(cardData, this);
+        }
+
+        ScrollRect scroll = deckContent != null ? deckContent.GetComponentInParent<ScrollRect>() : null;
+        if (scroll != null)
+            scroll.verticalNormalizedPosition = 1f;
+
+        Debug.Log($"[DeckEditor] Добавлена карта: {cardData.cardName}, id: {cardData.cardId}");
     }
 
     public void RemoveCardFromDeck(DeckCardUI ui)
     {
-        if (ui == null) return;
-        playerDeck.Remove(ui.Data);
+        if (ui == null)
+            return;
+
+        CardData card = ui.Data;
+
+        if (card != null)
+        {
+            playerDeck.Remove(card);
+            Debug.Log($"[DeckEditor] Удалена карта: {card.cardName}, id: {card.cardId}");
+        }
+
         Destroy(ui.gameObject);
-        Debug.Log("Карта удалилась!");
     }
 
-    void SaveDeck()
+    private void SaveDeck()
     {
-        Debug.Log("Сохраняем колоду...");
+        if (playerDeck.Count == 0)
+        {
+            Debug.LogWarning("[DeckEditor] Колода пустая. Сохранять нечего.");
+            return;
+        }
+
+        DeckStorage.SaveDeck(playerDeck);
+
+        Debug.Log("[DeckEditor] Сохранённые карты:");
         foreach (CardData card in playerDeck)
-            Debug.Log(card.cardName);
+        {
+            if (card == null)
+                continue;
+
+            Debug.Log($"- {card.cardId} / {card.cardName}");
+        }
+    }
+
+    private void BackToMainMenu()
+    {
+        Debug.Log("[DeckEditor] Возврат в главное меню.");
+        SceneManager.LoadScene("MainMenu");
     }
 }
-
-

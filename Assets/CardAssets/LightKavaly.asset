@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5659669f5fb18224285303594ebe4659, type: 3}
   m_Name: LightKavaly
   m_EditorClassIdentifier: 
+  cardId: kavalery_002
   cardName: LightKavalery
   cost: 5
   health: 5
