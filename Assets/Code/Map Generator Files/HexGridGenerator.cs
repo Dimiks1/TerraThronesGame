@@ -349,6 +349,19 @@ public class HexGridGenerator : MonoBehaviour
         return tile.gameObject.GetComponent<ProtectedHex>() != null;
     }
 
+    public HexTile GetHexAt(Vector2Int coord)
+    {
+        if (hexGrid.TryGetValue(coord, out HexTile hex))
+            return hex;
+
+        return null;
+    }
+
+    public Dictionary<Vector2Int, HexTile> GetHexGrid()
+    {
+        return hexGrid;
+    }
+
     float SampleHeight01(Vector2Int coord)
     {
         // 1) берём «идеальные» мировые координаты твоего гекса (xz-плоскость) 

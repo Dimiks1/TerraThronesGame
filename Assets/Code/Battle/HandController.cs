@@ -13,6 +13,10 @@ public class HandController : MonoBehaviour
     [SerializeField] private Camera gameplayCamera;
     [SerializeField] private UnitSpawner unitSpawner;
     [SerializeField] private TileHighlighter tileHighlighter;
+    [SerializeField] private PlayerEconomy playerEconomy;
+    [SerializeField] private BaseSpawnZone baseSpawnZone;
+    [SerializeField] private TurnManager turnManager;
+    [SerializeField] private CardPlayController cardPlayController;
 
     [Header("Drag UI")]
     [SerializeField] private Transform dragLayer;
@@ -47,16 +51,20 @@ public class HandController : MonoBehaviour
 
         foreach (CardData card in cards)
         {
-            BattleHandCardView view = Instantiate(cardPrefab, handRoot, false);
-
-            FixCardRectTransform(view);
-            view.Setup(card, this);
-
-            if (view.GetComponent<BattleHandCardDrag>() == null)
-                view.gameObject.AddComponent<BattleHandCardDrag>();
+            CreateCardView(card);
         }
 
         Debug.Log($"[HandController] Создано карт в UI руки: {cards.Count}");
+    }
+    private void CreateCardView(CardData card)
+    {
+        BattleHandCardView view = Instantiate(cardPrefab, handRoot, false);
+
+        FixCardRectTransform(view);
+        view.Setup(card, this);
+
+        if (view.GetComponent<BattleHandCardDrag>() == null)
+            view.gameObject.AddComponent<BattleHandCardDrag>();
     }
 
     public Transform GetDragLayer()
@@ -90,15 +98,21 @@ public class HandController : MonoBehaviour
 
         HexTile tile = GetTileUnderScreenPosition(screenPosition);
 
-        if (!CanPlayCardOnTile(cardView.Data, tile))
+        if (tile == null)
         {
-            Debug.Log("[HandController] Карту нельзя поставить на этот тайл.");
+            Debug.Log("[HandController] Под картой нет тайла.");
             return false;
         }
 
-        bool spawned = unitSpawner.TrySpawnUnit(cardView.Data, tile);
+        if (cardPlayController == null)
+        {
+            Debug.LogError("[HandController] cardPlayController не назначен.");
+            return false;
+        }
 
-        if (!spawned)
+        bool played = cardPlayController.TryPlayCard(cardView.Data, tile);
+
+        if (!played)
             return false;
 
         playerDeck.PlayCardFromHand(cardView.Data);
@@ -106,24 +120,42 @@ public class HandController : MonoBehaviour
         return true;
     }
 
+    public void DrawCardToHand()
+    {
+        if (playerDeck == null)
+        {
+            Debug.LogError("[HandController] playerDeck не назначен.");
+            return;
+        }
+
+        if (handRoot == null || cardPrefab == null)
+        {
+            Debug.LogError("[HandController] handRoot/cardPrefab не назначены.");
+            return;
+        }
+
+        CardData card = playerDeck.DrawCard();
+
+        if (card == null)
+        {
+            Debug.Log("[HandController] Карту добрать не удалось: колода пуста.");
+            return;
+        }
+
+        CreateCardView(card);
+
+        Debug.Log($"[HandController] Добрана карта в руку: {card.cardId} / {card.cardName}");
+    }
+
     private bool CanPlayCardOnTile(CardData cardData, HexTile tile)
     {
-        if (cardData == null)
+        if (cardPlayController == null)
+        {
+            Debug.LogError("[HandController] cardPlayController не назначен.");
             return false;
+        }
 
-        if (cardData.unitPrefab == null)
-            return false;
-
-        if (tile == null)
-            return false;
-
-        if (!tile.IsWalkable)
-            return false;
-
-        if (unitSpawner != null && unitSpawner.IsTileOccupied(tile))
-            return false;
-
-        return true;
+        return cardPlayController.CanPlayCard(cardData, tile);
     }
 
     private HexTile GetTileUnderScreenPosition(Vector2 screenPosition)

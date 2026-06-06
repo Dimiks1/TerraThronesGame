@@ -1938,19 +1938,21 @@ MonoBehaviour:
   forcedWidth: 160
   forcedHeight: 10
   allCards:
-  - {fileID: 11400000, guid: 997543bba7e69184fa02b985ebe34c3f, type: 2}
+  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
   - {fileID: 11400000, guid: 0ddb864e05d1dcb4f9ad3ccf528adeb8, type: 2}
+  - {fileID: 11400000, guid: 718f9d80b01348d49a40d2061e167aa8, type: 2}
+  - {fileID: 11400000, guid: d9c3e9d749254ad4b9c005edc5083cbb, type: 2}
+  - {fileID: 11400000, guid: 3cde352a38ea8d64fa3b31de9b5402ed, type: 2}
   - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
+  - {fileID: 11400000, guid: 0ddb864e05d1dcb4f9ad3ccf528adeb8, type: 2}
+  - {fileID: 11400000, guid: 718f9d80b01348d49a40d2061e167aa8, type: 2}
+  - {fileID: 11400000, guid: d9c3e9d749254ad4b9c005edc5083cbb, type: 2}
+  - {fileID: 11400000, guid: 3cde352a38ea8d64fa3b31de9b5402ed, type: 2}
   - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
-  - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
+  - {fileID: 11400000, guid: 0ddb864e05d1dcb4f9ad3ccf528adeb8, type: 2}
+  - {fileID: 11400000, guid: 718f9d80b01348d49a40d2061e167aa8, type: 2}
+  - {fileID: 11400000, guid: d9c3e9d749254ad4b9c005edc5083cbb, type: 2}
+  - {fileID: 11400000, guid: 3cde352a38ea8d64fa3b31de9b5402ed, type: 2}
   - {fileID: 11400000, guid: 29bebbeb8aa88274c916079400940b6d, type: 2}
 --- !u!4 &1218233929
 Transform:

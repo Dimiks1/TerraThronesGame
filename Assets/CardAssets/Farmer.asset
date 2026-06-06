@@ -13,13 +13,17 @@ MonoBehaviour:
   m_Name: Farmer
   m_EditorClassIdentifier: 
   cardId: farmer_001
+  cardType: 0
   cardName: Farmer
   cost: 2
-  health: 4
-  attack: 1
-  range: 1
-  moveRange: 3
   rarity: 0
   artwork: {fileID: 21300000, guid: 8fc3a8ce371b2514186a03795848fbe6, type: 3}
   description: just a simple farmer. Easy and cheep
-  unitPrefab: {fileID: 7661687630003501068, guid: ee8853fd3d9f2214fafcfbe6f8fc1c71, type: 3}
+  health: 4
+  attack: 1
+  range: 1
+  moveRange: 2
+  unitPrefab: {fileID: 5226607018220002488, guid: 2e526e2b0d1370449bc9be635b0f98d5, type: 3}
+  movementType: 0
+  spellTargetType: 0
+  spellDamage: 0

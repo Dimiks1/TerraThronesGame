@@ -1,15 +1,20 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TileHighlighter : MonoBehaviour
 {
-    [Header("Colors")]
+    [Header("Single Drag Colors")]
     [SerializeField] private Color validColor = new Color(0.3f, 1f, 0.3f, 1f);
     [SerializeField] private Color invalidColor = new Color(1f, 0.25f, 0.25f, 1f);
 
-    private HexTile currentTile;
-    private Renderer currentRenderer;
-    private Color originalColor;
-    private bool hasOriginalColor;
+    [Header("Movement Colors")]
+    [SerializeField] private Color movementColor = new Color(0.25f, 0.65f, 1f, 1f);
+    [SerializeField] private Color selectedUnitColor = new Color(1f, 1f, 0.25f, 1f);
+
+    private readonly Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
+
+    private HexTile currentDragTile;
+    private Renderer currentDragRenderer;
 
     public void Show(HexTile tile, bool isValid)
     {
@@ -19,43 +24,93 @@ public class TileHighlighter : MonoBehaviour
             return;
         }
 
-        if (currentTile == tile)
+        if (currentDragTile == tile)
         {
-            ApplyColor(isValid);
+            SetRendererColor(currentDragRenderer, isValid ? validColor : invalidColor);
             return;
         }
 
         Hide();
 
-        currentTile = tile;
-        currentRenderer = tile.GetComponentInChildren<Renderer>();
+        currentDragTile = tile;
+        currentDragRenderer = tile.GetComponentInChildren<Renderer>();
 
-        if (currentRenderer == null)
-            return;
-
-        originalColor = currentRenderer.material.color;
-        hasOriginalColor = true;
-
-        ApplyColor(isValid);
+        RememberOriginalColor(currentDragRenderer);
+        SetRendererColor(currentDragRenderer, isValid ? validColor : invalidColor);
     }
 
     public void Hide()
     {
-        if (currentRenderer != null && hasOriginalColor)
-        {
-            currentRenderer.material.color = originalColor;
-        }
+        if (currentDragRenderer != null)
+            RestoreRenderer(currentDragRenderer);
 
-        currentTile = null;
-        currentRenderer = null;
-        hasOriginalColor = false;
+        currentDragTile = null;
+        currentDragRenderer = null;
     }
 
-    private void ApplyColor(bool isValid)
+    public void HighlightMovementTiles(IEnumerable<HexTile> tiles)
     {
-        if (currentRenderer == null)
+        ClearAreaHighlights();
+
+        if (tiles == null)
             return;
 
-        currentRenderer.material.color = isValid ? validColor : invalidColor;
+        foreach (HexTile tile in tiles)
+        {
+            Renderer renderer = tile != null ? tile.GetComponentInChildren<Renderer>() : null;
+            RememberOriginalColor(renderer);
+            SetRendererColor(renderer, movementColor);
+        }
+    }
+
+    public void HighlightSelectedUnitTile(HexTile tile)
+    {
+        if (tile == null)
+            return;
+
+        Renderer renderer = tile.GetComponentInChildren<Renderer>();
+        RememberOriginalColor(renderer);
+        SetRendererColor(renderer, selectedUnitColor);
+    }
+
+    public void ClearAreaHighlights()
+    {
+        List<Renderer> renderers = new List<Renderer>(originalColors.Keys);
+
+        foreach (Renderer renderer in renderers)
+        {
+            RestoreRenderer(renderer);
+        }
+
+        originalColors.Clear();
+
+        currentDragTile = null;
+        currentDragRenderer = null;
+    }
+
+    private void RememberOriginalColor(Renderer renderer)
+    {
+        if (renderer == null)
+            return;
+
+        if (!originalColors.ContainsKey(renderer))
+            originalColors.Add(renderer, renderer.material.color);
+    }
+
+    private void RestoreRenderer(Renderer renderer)
+    {
+        if (renderer == null)
+            return;
+
+        if (originalColors.TryGetValue(renderer, out Color originalColor))
+            renderer.material.color = originalColor;
+    }
+
+    private void SetRendererColor(Renderer renderer, Color color)
+    {
+        if (renderer == null)
+            return;
+
+        renderer.material.color = color;
     }
 }

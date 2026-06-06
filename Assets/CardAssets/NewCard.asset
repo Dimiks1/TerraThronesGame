@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5659669f5fb18224285303594ebe4659, type: 3}
-  m_Name: LightKavaly
-  m_EditorClassIdentifier: 
-  cardId: kavalery_002
-  cardType: 0
-  cardName: LightKavalery
-  cost: 3
+  m_Name: NewCard
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  cardId: 006
+  cardType: 2
+  cardName: Arrows
+  cost: 2
   rarity: 0
-  artwork: {fileID: 21300000, guid: 23b1610c263a7954aabb4b574d9cc129, type: 3}
+  artwork: {fileID: 21300000, guid: f937c4b008894714d8b3976f7ab6ccf4, type: 3}
   description: 
-  health: 3
-  attack: 2
-  range: 1
-  moveRange: 4
-  unitPrefab: {fileID: 3991537624276385659, guid: 21f53c862ea08fc45a05256ae262171c, type: 3}
+  health: 0
+  attack: 0
+  range: 0
+  moveRange: 0
+  unitPrefab: {fileID: 0}
   movementType: 0
-  spellTargetType: 0
-  spellDamage: 0
+  spellTargetType: 1
+  spellDamage: 2
