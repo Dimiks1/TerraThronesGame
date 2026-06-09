@@ -44,7 +44,7 @@ public class CardPlayController : MonoBehaviour
         }
     }
 
-    public bool TryPlayCard(CardData cardData, HexTile targetTile)
+    public bool TryPlayCard(CardData cardData, HexTile targetTile, BattleUnit targetUnit = null)
     {
         if (!CanPlayCard(cardData, targetTile))
         {
@@ -68,7 +68,7 @@ public class CardPlayController : MonoBehaviour
                 break;
 
             case CardType.Spell:
-                success = PlaySpell(cardData, targetTile);
+                success = PlaySpell(cardData, targetTile, targetUnit);
                 break;
         }
 
@@ -122,7 +122,7 @@ public class CardPlayController : MonoBehaviour
             return false;
         }
 
-        if (!baseSpawnZone.CanSpawnPlayerUnit(targetTile))
+        if (!baseSpawnZone.CanBuildPlayerBuilding(targetTile))
             return false;
 
         return true;
@@ -157,31 +157,33 @@ public class CardPlayController : MonoBehaviour
         return unitSpawner.TrySpawnUnit(cardData, targetTile);
     }
 
-    private bool PlaySpell(CardData cardData, HexTile targetTile)
+    private bool PlaySpell(CardData cardData, HexTile targetTile, BattleUnit targetUnit)
     {
-        if (unitSpawner == null)
-        {
-            Debug.LogError("[CardPlayController] unitSpawner не назначен.");
+        if (targetTile == null)
             return false;
-        }
 
-        BattleUnit unit = unitSpawner.GetUnitAtTile(targetTile);
+        BattleUnit unitToDamage = targetUnit;
 
-        if (unit != null)
+        // Фолбэк: если по collider юнита не попали, пробуем найти юнита на тайле.
+        if (unitToDamage == null && unitSpawner != null)
+            unitToDamage = unitSpawner.GetUnitAtTile(targetTile);
+
+        if (unitToDamage != null)
         {
-            unit.TakeDamage(cardData.spellDamage);
+            int damage = Mathf.Max(0, cardData.spellDamage);
 
-            if (unit.CurrentHealth <= 0)
-                unitSpawner.RemoveUnit(unit);
+            Debug.Log($"[CardPlayController] Spell target: {unitToDamage.SourceCard.cardName}. Damage: {damage}");
 
-            Debug.Log($"[CardPlayController] Заклинание '{cardData.cardName}' нанесло {cardData.spellDamage} урона.");
+            unitToDamage.TakeDamage(damage);
+
+            if (unitToDamage.CurrentHealth <= 0)
+                unitSpawner.RemoveUnit(unitToDamage);
         }
         else
         {
             Debug.Log($"[CardPlayController] Заклинание '{cardData.cardName}' применено по пустой клетке.");
         }
 
-        // Если у спелла есть визуальный prefab — можно создать временный эффект.
         if (cardData.unitPrefab != null)
         {
             Vector3 position = targetTile.transform.position + Vector3.up * 0.5f;

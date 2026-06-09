@@ -653,8 +653,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraWasdController
   moveSpeed: 15
   rotationSpeed: 90
-  zoomSpeed: 16
-  minHeight: 8
+  zoomSpeed: 40
+  minHeight: 4
   maxHeight: 35
   useBounds: 1
   xBounds: {x: -30, y: 30}
@@ -1260,6 +1260,12 @@ MonoBehaviour:
   baseSpawnZone: {fileID: 864902613}
   turnManager: {fileID: 1389646476}
   cardPlayController: {fileID: 864902617}
+  unitLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  tileLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   dragLayer: {fileID: 148192986}
   cardSize: {x: 160, y: 220}
 --- !u!114 &864902609

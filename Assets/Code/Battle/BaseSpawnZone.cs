@@ -87,4 +87,60 @@ public class BaseSpawnZone : MonoBehaviour
 
         return false;
     }
+    public bool CanBuildPlayerBuilding(HexTile tile)
+    {
+        if (tile == null)
+            return false;
+
+        if (IsNearPlayerBase(tile))
+            return true;
+
+        if (IsNearPlayerUnit(tile))
+            return true;
+
+        return false;
+    }
+    private bool IsNearPlayerUnit(HexTile tile)
+    {
+        if (tile == null)
+            return false;
+
+        if (gridGenerator == null)
+        {
+            gridGenerator = FindFirstObjectByType<HexGridGenerator>();
+
+            if (gridGenerator == null)
+            {
+                Debug.LogError("[BaseSpawnZone] HexGridGenerator не найден.");
+                return false;
+            }
+        }
+
+        if (unitSpawner == null)
+            return false;
+
+        IReadOnlyList<BattleUnit> allUnits = unitSpawner.GetAllUnits();
+
+        foreach (BattleUnit unit in allUnits)
+        {
+            if (unit == null)
+                continue;
+
+            if (unit.SourceCard == null)
+                continue;
+
+            if (unit.CurrentTile == null)
+                continue;
+
+            if (unit.SourceCard.cardType != CardType.Unit)
+                continue;
+
+            int distance = gridGenerator.AxialDistance(tile.Coordinates, unit.CurrentTile.Coordinates);
+
+            if (distance <= 1)
+                return true;
+        }
+
+        return false;
+    }
 }

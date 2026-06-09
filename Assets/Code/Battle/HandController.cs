@@ -17,6 +17,8 @@ public class HandController : MonoBehaviour
     [SerializeField] private BaseSpawnZone baseSpawnZone;
     [SerializeField] private TurnManager turnManager;
     [SerializeField] private CardPlayController cardPlayController;
+    [SerializeField] private LayerMask unitLayerMask;
+    [SerializeField] private LayerMask tileLayerMask = ~0;
 
     [Header("Drag UI")]
     [SerializeField] private Transform dragLayer;
@@ -75,10 +77,40 @@ public class HandController : MonoBehaviour
         Canvas canvas = handRoot != null ? handRoot.GetComponentInParent<Canvas>() : null;
         return canvas != null ? canvas.transform : handRoot;
     }
+    private BattleUnit GetUnitUnderScreenPosition(Vector2 screenPosition)
+    {
+        if (gameplayCamera == null)
+        {
+            gameplayCamera = Camera.main;
+
+            if (gameplayCamera == null)
+            {
+                Debug.LogError("[HandController] gameplayCamera не назначена и Camera.main не найдена.");
+                return null;
+            }
+        }
+
+        Ray ray = gameplayCamera.ScreenPointToRay(screenPosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f, unitLayerMask, QueryTriggerInteraction.Collide))
+        {
+            BattleUnit unit = hit.collider.GetComponentInParent<BattleUnit>();
+
+            if (unit != null)
+                return unit;
+        }
+
+        return null;
+    }
 
     public void UpdateDragHighlight(Vector2 screenPosition, CardData cardData)
     {
-        HexTile tile = GetTileUnderScreenPosition(screenPosition);
+        BattleUnit targetUnit = GetUnitUnderScreenPosition(screenPosition);
+
+        HexTile tile = targetUnit != null
+            ? targetUnit.CurrentTile
+            : GetTileUnderScreenPosition(screenPosition);
+
         bool valid = CanPlayCardOnTile(cardData, tile);
 
         if (tileHighlighter != null)
@@ -96,9 +128,20 @@ public class HandController : MonoBehaviour
         if (cardView == null || cardView.Data == null)
             return false;
 
-        HexTile tile = GetTileUnderScreenPosition(screenPosition);
+        BattleUnit targetUnit = GetUnitUnderScreenPosition(screenPosition);
 
-        if (tile == null)
+        HexTile targetTile = null;
+
+        if (targetUnit != null)
+        {
+            targetTile = targetUnit.CurrentTile;
+        }
+        else
+        {
+            targetTile = GetTileUnderScreenPosition(screenPosition);
+        }
+
+        if (targetTile == null)
         {
             Debug.Log("[HandController] Под картой нет тайла.");
             return false;
@@ -110,7 +153,7 @@ public class HandController : MonoBehaviour
             return false;
         }
 
-        bool played = cardPlayController.TryPlayCard(cardView.Data, tile);
+        bool played = cardPlayController.TryPlayCard(cardView.Data, targetTile, targetUnit);
 
         if (!played)
             return false;
@@ -173,10 +216,19 @@ public class HandController : MonoBehaviour
 
         Ray ray = gameplayCamera.ScreenPointToRay(screenPosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
+        RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, tileLayerMask, QueryTriggerInteraction.Ignore);
+
+        if (hits == null || hits.Length == 0)
+            return null;
+
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (RaycastHit hit in hits)
         {
             HexTile tile = hit.collider.GetComponentInParent<HexTile>();
-            return tile;
+
+            if (tile != null)
+                return tile;
         }
 
         return null;
